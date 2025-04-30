@@ -21,13 +21,24 @@ if (!MONGO_URI) {
 // Middleware
 app.use(
   cors({
-    origin: [
-      'http://localhost:5173',
-      'https://be-production-d7fd.up.railway.app',
-    ],
+    origin: (origin, callback) => {
+      // Izinkan semua origin selama ada, atau tolak jika tidak ada (misal Postman)
+      if (
+        !origin ||
+        [
+          'http://localhost:5173',
+          'https://be-production-a2c5.up.railway.app/',
+        ].includes(origin)
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
+    optionsSuccessStatus: 200,
   })
 );
 
