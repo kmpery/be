@@ -1,5 +1,5 @@
 const express = require('express');
-const { RSVP } = require('../models/rsvp');
+const { RSVP } = require('./models/rsvp');
 
 const router = express.Router();
 
