@@ -1,6 +1,6 @@
+const cors = require('cors');
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
 const dotenv = require('dotenv');
 const commentsRouter = require('./routes/comments');
 const rsvpRouter = require('./routes/rsvp');
@@ -23,7 +23,7 @@ app.use(
   cors({
     origin: [
       'http://localhost:5173',
-      'https://wdg-frontend-production.up.railway.app',
+      'https://be-production-d7fd.up.railway.app',
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
