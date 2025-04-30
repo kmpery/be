@@ -10,7 +10,7 @@ const morgan = require('morgan');
 dotenv.config();
 
 const app = express();
-const PORT = parseInt(process.env.PORT || '8080', 10);
+const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI || '';
 
 if (!MONGO_URI) {
@@ -46,10 +46,12 @@ app.use(express.json());
 app.use(morgan('dev'));
 
 // Koneksi MongoDB
-mongoose
-  .connect(MONGO_URI)
-  .then(() => console.log('Terhubung ke MongoDB'))
-  .catch((error) => console.error('Gagal konek ke MongoDB:', error));
+mongoose.connect(MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+// .then(() => console.log('Terhubung ke MongoDB'))
+// .catch((error) => console.error('Gagal konek ke MongoDB:', error));
 
 // Routing
 app.use('/api/comments', commentsRouter);
