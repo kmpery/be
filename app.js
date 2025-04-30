@@ -13,11 +13,6 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI || '';
 
-if (!MONGO_URI) {
-  console.error('MONGO_URI belum diset di .env');
-  process.exit(1);
-}
-
 // Middleware
 app.use(
   cors({
@@ -46,12 +41,13 @@ app.use(express.json());
 app.use(morgan('dev'));
 
 // Koneksi MongoDB
-mongoose.connect(MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-// .then(() => console.log('Terhubung ke MongoDB'))
-// .catch((error) => console.error('Gagal konek ke MongoDB:', error));
+mongoose
+  .connect(MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log('Terhubung ke MongoDB'))
+  .catch((error) => console.error('Gagal konek ke MongoDB:', error));
 
 // Routing
 app.use('/api/comments', commentsRouter);
