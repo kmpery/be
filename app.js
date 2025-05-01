@@ -1,29 +1,18 @@
 const cors = require('cors');
 const express = require('express');
-const http = require('http'); // Tambahan untuk socket.io
-const { Server } = require('socket.io'); // Tambahan untuk socket.io
+const http = require('http'); // Dibutuhkan untuk WebSocket
+const WebSocket = require('ws'); // Gantikan socket.io
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const commentsRouter = require('./routes/comments');
 const rsvpRouter = require('./routes/rsvp');
 const morgan = require('morgan');
 
-// Load environment variables
 dotenv.config();
 
 const app = express();
-const server = http.createServer(app); // Ganti dari app.listen ke server.listen
-const io = new Server(server, {
-  cors: {
-    origin: [
-      'http://localhost:5173',
-      'https://alim-risa.vercel.app',
-      'https://alim-risa-kmperys-projects.vercel.app',
-    ],
-    methods: ['GET', 'POST'],
-    credentials: true,
-  },
-});
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server }); // Buat WebSocket server
 
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI || '';
@@ -77,17 +66,23 @@ app.get('/', (req, res) => {
   res.send('API Buku Tamu & RSVP aktif!');
 });
 
-// Socket.io logic
-io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
+// WebSocket native logic
+wss.on('connection', (ws) => {
+  console.log('Client WebSocket terhubung');
 
-  socket.on('new-comment', (data) => {
-    // Broadcast ke semua klien kecuali pengirim
-    socket.broadcast.emit('comment-added', data);
+  ws.on('message', (data) => {
+    console.log('Pesan masuk:', data.toString());
+
+    // Broadcast ke semua klien (kecuali pengirim)
+    wss.clients.forEach((client) => {
+      if (client !== ws && client.readyState === WebSocket.OPEN) {
+        client.send(data.toString());
+      }
+    });
   });
 
-  socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
+  ws.on('close', () => {
+    console.log('Client WebSocket terputus');
   });
 });
 
