@@ -16,7 +16,7 @@ const MONGO_URI = process.env.MONGO_URI || '';
 // Middleware
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://alim-risa-git-main-kmperys-projects.vercel.app/',
+  'https://alim-risa-git-main-kmperys-projects.vercel.app',
 ];
 
 app.use(
@@ -25,6 +25,7 @@ app.use(
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        console.log('Blocked by CORS:', origin); // bantu debug
         callback(new Error('Not allowed by CORS'));
       }
     },
@@ -34,8 +35,7 @@ app.use(
   })
 );
 
-// Tambahkan untuk tangani preflight
-app.options('*', cors());
+app.options('*', cors()); // optional, tapi bagus untuk preflight OPTIONS
 
 app.use(express.json());
 app.use(morgan('dev'));
