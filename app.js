@@ -1,5 +1,7 @@
 const cors = require('cors');
 const express = require('express');
+const http = require('http'); // Tambahan untuk socket.io
+const { Server } = require('socket.io'); // Tambahan untuk socket.io
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const commentsRouter = require('./routes/comments');
@@ -10,10 +12,23 @@ const morgan = require('morgan');
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app); // Ganti dari app.listen ke server.listen
+const io = new Server(server, {
+  cors: {
+    origin: [
+      'http://localhost:5173',
+      'https://alim-risa.vercel.app',
+      'https://alim-risa-kmperys-projects.vercel.app',
+    ],
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
+});
+
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI || '';
 
-// Middleware
+// Middleware CORS
 const allowedOrigins = [
   'http://localhost:5173',
   'https://alim-risa.vercel.app',
@@ -39,8 +54,7 @@ app.use(
     credentials: true,
   })
 );
-
-app.options('*', cors()); // optional, tapi bagus untuk preflight OPTIONS
+app.options('*', cors());
 
 app.use(express.json());
 app.use(morgan('dev'));
@@ -63,12 +77,27 @@ app.get('/', (req, res) => {
   res.send('API Buku Tamu & RSVP aktif!');
 });
 
-// Error handling middleware (optional)
+// Socket.io logic
+io.on('connection', (socket) => {
+  console.log('User connected:', socket.id);
+
+  socket.on('new-comment', (data) => {
+    // Broadcast ke semua klien kecuali pengirim
+    socket.broadcast.emit('comment-added', data);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
+});
+
+// Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Terjadi kesalahan pada server!');
 });
 
-app.listen(PORT, '0.0.0.0', () => {
+// Jalankan server
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server berjalan di http://0.0.0.0:${PORT}`);
 });
