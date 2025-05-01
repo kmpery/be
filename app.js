@@ -18,7 +18,7 @@ app.use(
   cors({
     origin: [
       'http://localhost:5173',
-      'https://be-production-ddd8.up.railway.app',
+      'https://be-production-41a4.up.railway.app',
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
