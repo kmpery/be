@@ -12,12 +12,18 @@ router.post('/', async (req, res) => {
   }
 
   try {
-    const newRSVP = new RSVP({ name, willAttend });
+    const existingRSVP = await RSVP.findOne({ name: name.trim() });
+
+    if (existingRSVP) {
+      return res.status(409).json({ error: 'Nama ini sudah mengisi RSVP.' });
+    }
+
+    const newRSVP = new RSVP({ name: name.trim(), willAttend });
     await newRSVP.save();
-    return res.status(201).json({ message: 'RSVP saved successfully' });
+    return res.status(201).json({ message: 'RSVP berhasil disimpan.' });
   } catch (error) {
     console.error('Error saving RSVP:', error);
-    return res.status(500).json({ error: 'Failed to save RSVP' });
+    return res.status(500).json({ error: 'Gagal menyimpan RSVP.' });
   }
 });
 
